@@ -1,0 +1,54 @@
+import os
+import io
+import keyboard
+import time
+from PIL import ImageGrab
+from google.cloud import vision
+import matplotlib.pyplot as plt
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS']='kk22.json'
+# Google Cloud Vision 클라이언트 초기화
+client = vision.ImageAnnotatorClient()
+
+def capture_and_type_google():
+    # 화면 캡처
+    time.sleep(0.01)
+    screenshot = ImageGrab.grab(bbox=(50, 50, 500, 500))
+    time.sleep(0.01)
+    
+    # 캡처된 이미지를 바이트 배열로 변환
+    plt.figure(figsize=(10, 6))  # 이미지 크기 설정
+    plt.imshow(screenshot)
+    plt.axis('off')  # 축을 보이지 않게 설정
+    plt.show()  # 이미지 보여주기
+
+    img_byte_arr = io.BytesIO()
+    screenshot.save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+    
+    # Google Cloud Vision API 요청
+    image = vision.Image(content=img_byte_arr)
+    
+    # 사물 인식 요청
+    response = client.text_detection(image=image)
+    texts = response.text_annotations
+
+    # 인식된 텍스트 출력 및 타이핑
+    if texts:
+        text = texts[0].description
+        print(text)
+    else:
+        print("인식된 텍스트가 없습니다.")
+
+
+try:
+    # 핫키 설정
+    keyboard.add_hotkey('F9', capture_and_type_google)
+
+    # 프로그램이 종료될 때까지 대기
+    print("프로그램이 실행 중입니다. 'F9' 키를 누르면 Google Cloud Vision OCR이 실행됩니다. 'ctrl+shift+0'누를시 종료")
+    keyboard.wait('ctrl+shift+0')
+finally:
+    # 프로그램 종료 시 실행될 코드
+    keyboard.remove_hotkey('F9')
+    print("프로그램이 종료되었습니다.")
