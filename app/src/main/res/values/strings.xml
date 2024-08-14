@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">capt</string>
+    <string name="text_recognition">Text Recognition</string>
+    <string name="object_recognition">Object Recognition</string>
+</resources>
